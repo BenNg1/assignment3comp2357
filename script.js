@@ -33,36 +33,32 @@ async function fetchPokemonTypes() {
     }
 }
 
-// display the different types as check boxes
 function displayTypeFilters(types) {
     const typeFiltersContainer = document.getElementById('typeFilters');
     types.forEach(type => {
         const filterItem = document.createElement('div');
         filterItem.className = 'filter-item';
 
-        // create a checkbox for each type
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.id = type.name;
         checkbox.name = type.name;
         checkbox.value = type.name;
 
-        // check the checkbox if the type is selected
         const label = document.createElement('label');
         label.htmlFor = type.name;
         label.textContent = type.name;
 
-        // add the type to the selectedTypes set when the checkbox is checked
         checkbox.addEventListener('change', () => {
             if (checkbox.checked) {
                 selectedTypes.add(type.name);
             } else {
                 selectedTypes.delete(type.name);
             }
+            currentPage = 1; // Reset to the first page
             filterPokemonByType();
         });
 
-        // append the checkbox and label to the filter item
         filterItem.appendChild(checkbox);
         filterItem.appendChild(label);
         typeFiltersContainer.appendChild(filterItem);
@@ -197,7 +193,6 @@ function showPokemonDetails(pokemon) {
 async function filterPokemonByType() {
     filteredPokemonList = [];
 
-    // if no types are selected, show all pokemon
     if (selectedTypes.size === 0) {
         filteredPokemonList = [...pokemonList];
     } else {
