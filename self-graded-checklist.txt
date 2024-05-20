@@ -6,7 +6,7 @@ Self-graded Assignment 3 Checklist
 [x]  Display the pokemon's details in the modal
 [x]  All pokemons are accessible through the pagination buttons
 [x]  Display only at max 5 pages at a time
-[x]  Display the next and previous buttons
+[]  Display the next and previous buttons
 
 [x]  Highlight the current page's button
 [x]  Hide the next and previous buttons when there is no next or previous page
