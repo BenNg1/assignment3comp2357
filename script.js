@@ -1,14 +1,12 @@
 const apiUrl = 'https://pokeapi.co/api/v2/pokemon?limit=1277';
-// url to get pokemon types
 const typeUrl = 'https://pokeapi.co/api/v2/type';
-// number of pokemon per page
 const pageSize = 10;
 let currentPage = 1;
 let pokemonList = [];
 let filteredPokemonList = [];
 let selectedTypes = new Set();
 
-// display the pokemon list + fetch the list of pokemon
+// fetching the pokemon list
 async function fetchPokemon() {
     try {
         const response = await fetch(apiUrl);
@@ -22,19 +20,21 @@ async function fetchPokemon() {
     }
 }
 
-// get the pokemon types
+// fetching the pokemon types
 async function fetchPokemonTypes() {
     try {
         const response = await fetch(typeUrl);
         const data = await response.json();
         displayTypeFilters(data.results);
     } catch (error) {
-        console.error('Error fetching Pokemon types:', error);
+        console.error('Error fetching Pokdmon types:', error);
     }
 }
 
+// display the types as check boxes
 function displayTypeFilters(types) {
     const typeFiltersContainer = document.getElementById('typeFilters');
+    typeFiltersContainer.innerHTML = '';
     types.forEach(type => {
         const filterItem = document.createElement('div');
         filterItem.className = 'filter-item';
@@ -55,8 +55,10 @@ function displayTypeFilters(types) {
             } else {
                 selectedTypes.delete(type.name);
             }
-            currentPage = 1; // Reset to the first page
+            currentPage = 1;
             filterPokemonByType();
+            setupPagination();
+            displayPage(currentPage);
         });
 
         filterItem.appendChild(checkbox);
@@ -65,31 +67,31 @@ function displayTypeFilters(types) {
     });
 }
 
-// fetch the details of a pokemon
+// fetch the pokemon abilities, stats, and types
 async function fetchPokemonDetails(url) {
     try {
         const response = await fetch(url);
         const data = await response.json();
         return data;
     } catch (error) {
-        console.error('Error fetching Pokemon details:', error);
+        console.error('Error fetching Pokdmon details:', error);
         return null;
     }
 }
 
-// display a page of pokemon
+// display the page of pokemon
 async function displayPage(page) {
     const startIndex = (page - 1) * pageSize;
     const endIndex = page * pageSize;
     const pokemonSubset = filteredPokemonList.slice(startIndex, endIndex);
 
     const pokemonContainer = document.getElementById('pokemonList');
-    pokemonContainer.innerHTML = '';
+    pokemonContainer.innerHTML = ''; 
 
-    // Display each pokemon in the subset
+    // loop through the subset of Pokemon and display them
     for (const pokemon of pokemonSubset) {
         const pokemonData = await fetchPokemonDetails(pokemon.url);
-        // check if the pokemon data was fetched successfully
+        // check if the pokemon data is available
         if (pokemonData) {
             const pokemonDiv = document.createElement('div');
             pokemonDiv.className = 'pokemon';
@@ -110,7 +112,6 @@ async function displayPage(page) {
             pokemonDiv.addEventListener('click', () => showPokemonDetails(pokemonData));
         }
     }
-
     updatePokemonCount();
 }
 
@@ -122,7 +123,7 @@ function updatePokemonCount() {
     pokemonCountContainer.textContent = `Showing ${displayedPokemon} of ${totalPokemon} Pokemon`;
 }
 
-// pagination buttons
+// pagination controls
 function setupPagination() {
     const paginationContainer = document.getElementById('paginationControls');
     paginationContainer.innerHTML = '';
@@ -132,6 +133,7 @@ function setupPagination() {
     let startPage = currentPage - Math.floor(maxPagesToShow / 2);
     let endPage = currentPage + Math.floor(maxPagesToShow / 2);
 
+    // ensure the pagination controls don't go out of bounds
     if (startPage < 1) {
         startPage = 1;
         endPage = Math.min(maxPagesToShow, totalPages);
@@ -140,6 +142,7 @@ function setupPagination() {
         startPage = Math.max(1, totalPages - maxPagesToShow + 1);
     }
 
+    // create a button for each page
     for (let i = startPage; i <= endPage; i++) {
         const pageButton = document.createElement('button');
         pageButton.textContent = i;
@@ -147,6 +150,7 @@ function setupPagination() {
             pageButton.disabled = true;
         }
 
+        // add an event listener to each button to display the corresponding page
         pageButton.addEventListener('click', () => {
             currentPage = i;
             displayPage(currentPage);
@@ -157,8 +161,7 @@ function setupPagination() {
     }
 }
 
-// show pokemon details when clicked 
-// this will pop up a modal with all the information
+// show the pokemon details in a modal
 function showPokemonDetails(pokemon) {
     const modal = document.getElementById('pokemonModal');
     const modalContent = document.getElementById('modalContent');
@@ -176,12 +179,12 @@ function showPokemonDetails(pokemon) {
 
     modal.style.display = 'block';
 
-    // close the modal when clicking the x
+    // close modal when clicking on the close button
     document.querySelector('.close-button').addEventListener('click', () => {
         modal.style.display = 'none';
     });
 
-    // close the modal when clicking outside the modal
+    // close modal when clicking outside of the modal
     window.addEventListener('click', (event) => {
         if (event.target == modal) {
             modal.style.display = 'none';
@@ -189,10 +192,11 @@ function showPokemonDetails(pokemon) {
     });
 }
 
-// filter pokemon by types
+// filtering the pokemon by types
 async function filterPokemonByType() {
     filteredPokemonList = [];
 
+    // If no types are selected, display all pokemon
     if (selectedTypes.size === 0) {
         filteredPokemonList = [...pokemonList];
     } else {
@@ -204,8 +208,6 @@ async function filterPokemonByType() {
         }
     }
 
-    // if new page, reset to page 1
-    currentPage = 1;
     displayPage(currentPage);
     setupPagination();
 }
